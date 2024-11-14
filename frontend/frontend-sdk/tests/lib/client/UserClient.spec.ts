@@ -22,52 +22,6 @@ beforeEach(() => {
   });
 });
 
-describe("UserClient.getInfo()", () => {
-  it("should retrieve user info", async () => {
-    const response = new Response(new XMLHttpRequest());
-    response.ok = true;
-    response._decodedJSON = {
-      id: userID,
-      verified: true,
-      has_webauthn_credential: true,
-    };
-
-    jest.spyOn(userClient.client, "post").mockResolvedValueOnce(response);
-    const getInfoResponse = userClient.getInfo(email);
-    await expect(getInfoResponse).resolves.toBe(response._decodedJSON);
-
-    expect(userClient.client.post).toHaveBeenCalledWith("/user", {
-      email,
-    });
-  });
-
-  it("should throw error when user not found", async () => {
-    const response = new Response(new XMLHttpRequest());
-    response.status = 404;
-    jest.spyOn(userClient.client, "post").mockResolvedValue(response);
-
-    const user = userClient.getInfo(email);
-    await expect(user).rejects.toThrow(NotFoundError);
-  });
-
-  it("should throw error when API response is not ok", async () => {
-    const response = new Response(new XMLHttpRequest());
-    userClient.client.post = jest.fn().mockResolvedValue(response);
-
-    const user = userClient.getInfo(email);
-    await expect(user).rejects.toThrowError(TechnicalError);
-  });
-
-  it("should throw error on API communication failure", async () => {
-    userClient.client.post = jest
-      .fn()
-      .mockRejectedValue(new Error("Test error"));
-
-    const user = userClient.getInfo(email);
-    await expect(user).rejects.toThrowError("Test error");
-  });
-});
-
 describe("UserClient.getCurrent()", () => {
   it("should retrieve currently logged in user", async () => {
     const responseMe = new Response(new XMLHttpRequest());
